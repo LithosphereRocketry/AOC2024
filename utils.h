@@ -22,24 +22,26 @@ typedef struct {
 	int * contents;
 } intList;
 
-void init(intList * list) {
+void il_init(intList * list) {
 	list->len = 0;
 	list->capacity = 1;
 	list->contents = malloc(sizeof(int));
 }
 
-void clear(intList * list) {
+void il_destroy(intList * list) {
 	free(list->contents);
-	init(list);
 }
 
-void append(intList * list, int item) {
+void il_clear(intList * list) {
+	il_destroy(list);
+	il_init(list);
+}
+
+void il_append(intList * list, int item) {
 	if(list->len >= list->capacity) {
 		list->capacity *= 2;
-		int* newList = malloc(list->capacity * sizeof(int));
-		memcpy(newList, list->contents, list->len);
+		list->contents = realloc(list->contents, list->capacity*sizeof(int));
 	}
-	free(list->contents);
 	list->contents[list->len] = item;
 	list->len ++;
 }
@@ -58,6 +60,46 @@ size_t memcount(char c, const char* buf, size_t len) {
 		if(buf[i] == c) count++;
 	}
 	return count;
+}
+
+
+/**
+ * Helper function for read-until-character to heap
+ * Reads until the given character, or EOF if until=-1
+*/
+static char* fread_dup_helper(FILE* stream, int until) {
+    char* str = malloc(1);
+    size_t size = 0;
+    size_t cap = 1;
+    if(!str) return NULL;
+
+    while(1) {
+        str[size] = fgetc(stream);
+        if(feof(stream)) break;
+
+        size ++;
+        if(size >= cap) {
+            cap *= 2;
+            char* newstr = realloc(str, cap);
+            if(!newstr) {
+                free(str);
+                return NULL;
+            }
+            str = newstr;
+        }
+        if(str[size-1] == until) break;
+    }
+    str = realloc(str, size+1);
+    str[size] = '\0';
+    return str;
+}
+
+char* fgets_dup(FILE* stream) {
+    return fread_dup_helper(stream, '\n');
+}
+
+char* fread_dup(FILE* stream) {
+    return fread_dup_helper(stream, -1);
 }
 
 #endif
