@@ -37,10 +37,48 @@ void il_clear(intList * list) {
 	il_init(list);
 }
 
+void il_reserve(intList * list, size_t len) {
+	list->capacity = len;
+	list->contents = realloc(list->contents, list->capacity*sizeof(int));
+}
+
 void il_append(intList * list, int item) {
 	if(list->len >= list->capacity) {
-		list->capacity *= 2;
-		list->contents = realloc(list->contents, list->capacity*sizeof(int));
+		il_reserve(list, list->capacity*2);
+	}
+	list->contents[list->len] = item;
+	list->len ++;
+}
+
+typedef struct {
+	size_t len;
+	size_t capacity;
+	long * contents;
+} longList;
+
+void ll_init(longList * list) {
+	list->len = 0;
+	list->capacity = 1;
+	list->contents = malloc(sizeof(long));
+}
+
+void ll_destroy(longList * list) {
+	free(list->contents);
+}
+
+void ll_clear(longList * list) {
+	ll_destroy(list);
+	ll_init(list);
+}
+
+void ll_reserve(longList * list, size_t len) {
+	list->capacity = len;
+	list->contents = realloc(list->contents, list->capacity*sizeof(long));
+}
+
+void ll_append(longList * list, long item) {
+	if(list->len >= list->capacity) {
+		ll_reserve(list, list->capacity*2);
 	}
 	list->contents[list->len] = item;
 	list->len ++;
@@ -50,6 +88,14 @@ void listPrint(intList * list) {
 	printf("[");
 	for(int i = 0; i < list->len; i++) {
 		printf("%i%s", list->contents[i], (i < list->len-1) ? ", " : "");
+	}
+	printf("]\n");
+}
+
+void longListPrint(longList * list) {
+	printf("[");
+	for(int i = 0; i < list->len; i++) {
+		printf("%li%s", list->contents[i], (i < list->len-1) ? ", " : "");
 	}
 	printf("]\n");
 }
