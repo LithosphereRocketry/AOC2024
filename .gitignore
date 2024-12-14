@@ -2,4 +2,5 @@ day*
 !day*.*
 input.txt
 testinput.txt
+output.txt
 .vscode
